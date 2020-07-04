@@ -122,6 +122,31 @@ class TocParser(Parser):
         return [1 + len(indent) // self.indent, title, page + self.offset, 0]
 
 
+class GuessTocParser(TocParser):
+    """Guess indentations from title text.
+
+    When first characters are numbers and dots (no leading spaces),
+    add indents for as many dots.
+
+    The last dot is optional.
+
+    1. xxx
+    1.1. xxx        <-- add one indent level
+    1.1.1 xxx       <-- add two indent level
+    """
+    def newTerm(self, indent, title, page):
+        indent, title = self.guessIndent(indent, title)
+        return super().newTerm(indent, title, page)
+
+    def guessIndent(self, indent, title):
+        if indent == '':
+            m = re.match(r'\d+((\.\d+)+)\.?(\s|$)', title)
+            if m:
+                inc = len(m.group(1).split('.')) - 1
+                indent = ' ' * self.indent * inc
+        return indent, title
+
+
 formatList = ['json', 'toc']
 
 
@@ -221,7 +246,7 @@ def main():
                 file.read(), object_hook=TocJsonHook)
         else:
             toc = []
-            parser = TocParser()
+            parser = GuessTocParser()
             l: str
             for l in file:
                 term = parser(str(l))
