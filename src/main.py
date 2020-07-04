@@ -100,7 +100,7 @@ class TocParser(Parser):
                 r'offset\s*=\s*(\d+)': self.setOffset,
                 r'indent\s*=\s*(\d+)': self.setIndent
             }),
-            r'^( *)(.+) (\d+)\s*$': self.newTerm,
+            r'^( *)(.+) +(\d+)\s*$': self.newTerm,
         })
         self.offset: int = 0
         self.indent: int = 4
